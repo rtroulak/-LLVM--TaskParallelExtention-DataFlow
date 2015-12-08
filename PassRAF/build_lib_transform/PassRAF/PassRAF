@@ -1,0 +1,48 @@
+
+##########################################
+# @file PassRAF
+# @author Troulakis Georgios Rafail <rtroulak@ics.forth.gr>,<rtroulak@gmail.com>
+# @version v1.0
+# @date 2015-21-10
+#########################################
+#!/bin/bash
+echo "|||_______________________________(Start of Script)_______________________________|||"
+name="$1"	
+echo "our testfile is $name.c"
+echo "[1.my script raf]"
+./fclean #delete older files before the procedure begins
+echo "[2.clean folder from older files]"
+echo '#include "../../../../llvm/include/llvm/Partee/include/partee.h"' | cat - $name.c > temp && mv temp $name.c #import usefull code
+echo 'void spawn(){};' | cat - $name.c > temp && mv temp $name.c #import usefull code
+echo "including partee succeed"
+clang -S -emit-llvm  $name.c -o $name.bc #create bitecode from (input) .c file
+echo "[3.compiling with clang succeed]"
+make #compile my pass
+echo "[4.compile the pass]"
+echo "|||--------------------------------------------------------------------|||"
+opt -load ../../../Release+Asserts/lib/PassRAF.so -instnamer -time-passes -PassRAF < $name.bc > new.bc #run the pass and create the new .bc file with my changes
+echo "|||--------------------------------------------------------------------|||"
+echo "[5.run the pass]"
+llc -filetype=obj new.bc -o new.o #compile program to object with llc
+llc -march=cpp -o output.cpp new.bc 
+clang -g -O3 new.o -pthread   ../../../../llvm/include/llvm/Partee/lib/libtpc.a -lnuma ../../../../llvm/include/llvm/Partee/lib/libregions.a -lm -o new  #second way to link object with libs
+printf "\n[6.Run the new .c file]\n"
+echo -e "$(sed '1d' $name.c)\n" > $name.c #delete the inmported code
+echo -e "$(sed '1d' $name.c)\n" > $name.c #delete the inmported code
+echo "[7.delete the line which we add with partee including]"
+echo "[8.Finally print main's function created final IR code]"
+
+echo " ___								___"
+echo "|								   |"
+echo ' '
+echo ' '
+./new 4 4 4 4 4 4 4
+
+echo ' '
+echo ' '
+echo ' '
+echo "|___								___|"
+echo ' '
+echo ' '
+echo "[9.run executable file]"
+echo "|||_______________________________(End  of Script)_______________________________|||"

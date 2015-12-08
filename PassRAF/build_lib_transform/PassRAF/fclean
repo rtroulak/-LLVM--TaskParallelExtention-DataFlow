@@ -1,0 +1,12 @@
+
+##########################################
+# @file flclean
+# @author Troulakis Georgios Rafail <rtroulak@ics.forth.gr>,<rtroulak@gmail.com>
+# @version v1.0
+# @date 2015-21-10
+#########################################
+#!/bin/bash
+rm *.bc
+rm new
+rm *.o output.cpp
+make clean
